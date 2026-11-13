@@ -14,10 +14,7 @@ public sealed class MainForm : Form
     private readonly Label _counterLabel;
     private readonly KeyboardHook _keyboardHook;
 
-    // Счётчик всех записанных событий.
     private int _eventCount = 0;
-
-    // Чтобы не включать hook, пока форма уже закрывается.
     private bool _isClosing = false;
 
     public MainForm()
@@ -90,7 +87,6 @@ public sealed class MainForm : Form
         Controls.Add(_logTextBox);
         Controls.Add(toolbar);
 
-        // Обычные события WinForms.
         KeyDown += OnLocalKeyDown;
         KeyUp += OnLocalKeyUp;
 
@@ -102,8 +98,6 @@ public sealed class MainForm : Form
         Deactivate += OnFormDeactivated;
         FormClosing += OnFormClosing;
     }
-
-    // -------------------- Вспомогательное --------------------
 
     private void ClearLog()
     {
@@ -128,18 +122,14 @@ public sealed class MainForm : Form
         _counterLabel.Text = $"Событий: {_eventCount}";
     }
 
-    // -------------------- WinForms-события --------------------
-
     private void OnLocalKeyDown(object? sender, KeyEventArgs e)
     {
-        // Задание: Escape очищает журнал.
         if (e.KeyCode == Keys.Escape)
         {
             ClearLog();
             return;
         }
 
-        // Бонусное задание: фильтр только F1-F12.
         if (_onlyFunctionKeysCheckBox.Checked && !IsFunctionKey(e.KeyCode))
             return;
 
@@ -154,8 +144,6 @@ public sealed class MainForm : Form
         AppendLog("WinForms KeyUp", e.KeyCode.ToString());
     }
 
-    // -------------------- События от hook --------------------
-
     private void OnHookKeyPressed(Keys key)
     {
         if (IsDisposed || !IsHandleCreated)
@@ -163,7 +151,6 @@ public sealed class MainForm : Form
 
         try
         {
-            // Обновляем UI через очередь сообщений формы.
             BeginInvoke(new Action(() =>
             {
                 if (IsDisposed)
@@ -180,8 +167,6 @@ public sealed class MainForm : Form
             Debug.WriteLine($"Не удалось обновить журнал: {ex}");
         }
     }
-
-    // -------------------- Управление hook --------------------
 
     private void OnHookCheckedChanged(object? sender, EventArgs e)
     {
@@ -249,7 +234,6 @@ public sealed class MainForm : Form
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)
     {
-        // Задание: кнопка включения hook недоступна при закрытии.
         _isClosing = true;
         _hookCheckBox.Enabled = false;
         _onlyFunctionKeysCheckBox.Enabled = false;
